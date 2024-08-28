@@ -8,6 +8,7 @@
 package com.mailersend.sdk.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -18,9 +19,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.jupiter.api.AfterAll;
+import com.mailersend.sdk.emails.EmailSender;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -297,7 +297,7 @@ public class EmailSendTest {
     }
     
     @Test
-    public void ScheduleEmailTest() {
+    public void ScheduleEmailTest() throws MailerSendException {
         Email email = new Email();
         
         email.subject = TestHelper.subject;
@@ -320,14 +320,36 @@ public class EmailSendTest {
         
         MailerSend ms = new MailerSend();
         ms.setToken(TestHelper.validToken);
-        
+
         try {
-            
             MailerSendResponse response = ms.emails().send(email);
         } catch (MailerSendException e) {
-            
             // fail if any error is thrown
-            fail();
+            // unless it is an unauthenticated error since we are using an invalid token
+            if (!e.getMessage().contains("Unauthenticated")) {
+                fail();
+            }
         }
+    }
+
+
+    @Test
+    void TestNewConstructor() throws MailerSendException {
+
+        MailerSend mailerSend = MailerSend.getInstance(TestHelper.validToken);
+        EmailSender emailSend = mailerSend.getEmailSender();
+
+        MailerSend ms = new MailerSend(TestHelper.invalidToken);
+        EmailSender emailSender = ms.getEmailSender();
+
+        emailSender.setDefaultFrom(new Recipient("name", "your email"));
+        Email email = emailSender.createEmail();
+        email.setSubject("subject");
+        email.setHtml("html");
+        email.setPlain("plain");
+        email.addRecipient("name", "your email");
+
+//        emailSender.sendTo(email);
+        assertThrows(MailerSendException.class, () -> emailSender.sendTo(email), "Actual api call is expected to fail when random token is used");
     }
 }

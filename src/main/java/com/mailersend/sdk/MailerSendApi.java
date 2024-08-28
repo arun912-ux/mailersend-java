@@ -14,6 +14,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.google.gson.Gson;
@@ -42,7 +44,13 @@ public class MailerSendApi {
      * Constructor, initializes the HttpClient
      */
     public MailerSendApi() {
-        
+        this.client = MailerSendHttpClientFactory.getInstance().createClient();
+    }
+    /**
+     * Constructor, initializes the HttpClient and token
+     */
+    public MailerSendApi(String token) {
+        this.apiToken = token;
         this.client = MailerSendHttpClientFactory.getInstance().createClient();
     }
     
@@ -257,31 +265,20 @@ public class MailerSendApi {
                 .addDeserializationExclusionStrategy(new JsonSerializationDeserializationStrategy(true))
                 .create();
         
-        int[] successCodes = {200, 201, 202, 204};
-        
-        boolean isSuccess = false;
-        
-        for (int code : successCodes) {
-            
-            if (code == responseObject.statusCode()) {
-                
-                isSuccess = true;
-                break;
-            }
-        }
+        List<Integer> successCodes = Arrays.asList(200, 201, 202, 204);
+        boolean isSuccess = successCodes.contains(responseObject.statusCode());
         
         if (responseObject != null && !isSuccess) {
             
             stringResponse = responseObject.body().toString();
-            
+
             MailerSendException responseError;
             
             try {
             	
 	            JsonResponseError error = gson.fromJson(stringResponse, JsonResponseError.class);
-	            
+
 	            responseError = new MailerSendException(error.message);
-	         
 	            responseError.errors = error.errors;
             } catch (Exception ex) {
             	

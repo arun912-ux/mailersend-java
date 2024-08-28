@@ -10,7 +10,7 @@ package com.mailersend.sdk;
 import com.mailersend.sdk.activities.Activities;
 import com.mailersend.sdk.analytics.Analytics;
 import com.mailersend.sdk.domains.Domains;
-import com.mailersend.sdk.emails.Emails;
+import com.mailersend.sdk.emails.EmailSender;
 import com.mailersend.sdk.inboundroutes.InboundRoutes;
 import com.mailersend.sdk.messages.Messages;
 import com.mailersend.sdk.recipients.Recipients;
@@ -39,7 +39,7 @@ public class MailerSend {
     private Tokens tokens = null;
     private Webhooks webhooks = null;
     private Templates templates = null;
-    private Emails emails = null;
+    private EmailSender emailSender = null;
     private InboundRoutes inboundRoutes = null;
     private ScheduledMessages scheduledMessages = null;
     private EmailVerification emailVerification = null;
@@ -50,7 +50,7 @@ public class MailerSend {
      */
     public MailerSend() {
         
-        emails = new Emails(this);
+        emailSender = new EmailSender(this);
         activities = new Activities(this);
         analytics = new Analytics(this);
         domains = new Domains(this);
@@ -64,6 +64,38 @@ public class MailerSend {
         emailVerification = new EmailVerification(this);
         sms = new Sms(this);
     }
+    /**
+     * Constructor for MailerSend with token
+     */
+    public MailerSend(String token) {
+        this.token = token;
+        emailSender = new EmailSender(this);
+        activities = new Activities(this);
+        analytics = new Analytics(this);
+        domains = new Domains(this);
+        messages = new Messages(this);
+        recipients = new Recipients(this);
+        tokens = new Tokens(this);
+        webhooks = new Webhooks(this);
+        templates = new Templates(this);
+        inboundRoutes = new InboundRoutes(this);
+        scheduledMessages = new ScheduledMessages(this);
+        emailVerification = new EmailVerification(this);
+        sms = new Sms(this);
+    }
+
+
+    /**
+     * static instance for MailerSend with token
+     */
+    static MailerSend instance = null;
+    public static MailerSend getInstance(String token) {
+        if (instance == null) {
+            instance = new MailerSend(token);
+        }
+        return instance;
+    }
+
     
     
     /**
@@ -71,9 +103,17 @@ public class MailerSend {
      *
      * @return the Emails object
      */
-    public Emails emails() {
-        
-        return emails;
+    public EmailSender emails() {
+        return emailSender;
+    }
+
+    /**
+     * Get the EmailSender object
+     *
+     * @return the EmailSender object
+     */
+    public EmailSender getEmailSender() {
+        return emailSender;
     }
     
     

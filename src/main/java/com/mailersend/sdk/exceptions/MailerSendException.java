@@ -8,6 +8,7 @@
 package com.mailersend.sdk.exceptions;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Is thrown when an error is returned from the MailerSend API
@@ -15,7 +16,7 @@ import java.util.HashMap;
  * @author mailersend
  * @version $Id: $Id
  */
-public class MailerSendException extends Exception {
+public class MailerSendException extends RuntimeException {
 
     public int code; // the response code
     
@@ -23,7 +24,7 @@ public class MailerSendException extends Exception {
     
     public String responseBody = null;
     
-    public HashMap<String, String[]> errors = new HashMap<String, String[]>();
+    public Map<String, String[]> errors = new HashMap<>();
     
     /**
      * <p>Constructor for MailerSendException.</p>
@@ -31,7 +32,6 @@ public class MailerSendException extends Exception {
      * @param message a {@link java.lang.String} object.
      */
     public MailerSendException(String message) {
-        
         super(message);
     }
 

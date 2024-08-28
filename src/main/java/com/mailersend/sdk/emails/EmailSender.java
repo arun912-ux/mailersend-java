@@ -16,7 +16,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mailersend.sdk.MailerSend;
@@ -33,23 +32,31 @@ import com.mailersend.sdk.util.JsonSerializationDeserializationStrategy;
  * @author mailersend
  * @version $Id: $Id
  */
-public class Emails {
+public class EmailSender {
 
     private MailerSend apiObjectReference;
    
     private Recipient defaultFrom = null;
+
+    private MailerSendApi apiClient;
     
     /**
      * <p>Constructor for Emails.</p>
      *
      * @param objectRef a {@link com.mailersend.sdk.MailerSend} object.
      */
-    public Emails(MailerSend objectRef) {
-        
+//    public EmailSender(MailerSend objectRef) {
+//
+//        apiObjectReference = objectRef;
+//    }
+//
+    public EmailSender(MailerSend objectRef) {
+        apiClient = new MailerSendApi();
+        apiClient.setToken(objectRef.getToken());
         apiObjectReference = objectRef;
     }
-    
-    
+
+
     /**
      * Sets the default from
      *
@@ -94,7 +101,16 @@ public class Emails {
         return response;
     }
     
-    
+    public MailerSendResponse sendTo(Email email) throws MailerSendException {
+
+        String json = email.serializeForSending();
+
+//        MailerSendApi api = new MailerSendApi(apiObjectReference.getToken());
+
+        return apiClient.postRequest("/email", json, MailerSendResponse.class);
+    }
+
+
     /**
      * Sends the given emails in one batch call
      *
